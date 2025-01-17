@@ -106,9 +106,10 @@ def lambda_handler(event, context):
     fecha = datetime.datetime.now(datetime.timezone.utc)
     fecha_now = fecha_now.strftime("%d/%m/%Y")
 
-
     # Definir la zona horaria de México
     zona_horaria_mexico = pytz.timezone('America/Mexico_City')
+    fecha = fecha.astimezone(zona_horaria_mexico)
+    fecha = fecha.strftime("%d/%m/%Y")
 
     #Hacemos el login en la plataforma de Unigis
     sessio,jar,csrf_token = login_unigis(user=usr,pas=pas)
@@ -160,6 +161,9 @@ def lambda_handler(event, context):
         df_response = pd.read_csv(csv, sep=';', on_bad_lines = 'skip')
         #Remplazamos los NaN por None
         df_response = df_response.where(pd.notnull(df_response), None)
+        #Añadimos la columna de fecha de descarga
+        df_response["fecha_descarga"] = fecha
+        del fecha
     except:
         print("No es un csv")
         return {
